@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_HrOC9JpFETIsXGf_yptJhg_sKdWAzHe';
 
 // Supabase client oluştur
 const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const biletproSupabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Global değişkenler
 let currentUser = null;
@@ -15,7 +15,7 @@ let sales = [];
 // Authentication
 async function login(username, password) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('users')
             .select('*')
             .eq('username', username)
@@ -39,7 +39,7 @@ async function login(username, password) {
 // Events API
 async function loadEvents() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('events')
             .select('*')
             .order('date', { ascending: false });
@@ -56,7 +56,7 @@ async function loadEvents() {
 
 async function saveEvent(eventData) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('events')
             .insert(eventData)
             .select();
@@ -73,7 +73,7 @@ async function saveEvent(eventData) {
 // Customers API
 async function loadCustomers() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('customers')
             .select('*')
             .order('created_at', { ascending: false });
@@ -89,7 +89,7 @@ async function loadCustomers() {
 
 async function saveCustomer(customerData) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('customers')
             .insert(customerData)
             .select();
@@ -106,7 +106,7 @@ async function saveCustomer(customerData) {
 // Sales API
 async function loadSales() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('sales')
             .select(`
                 *,
@@ -127,7 +127,7 @@ async function loadSales() {
 
 async function makeSale(saleData) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await biletproSupabase
             .from('sales')
             .insert(saleData)
             .select();
@@ -144,7 +144,7 @@ async function makeSale(saleData) {
 // Real-time Listeners
 function setupRealtimeListeners() {
     // Events listener
-    supabase
+    biletproSupabase
         .channel('events')
         .on('postgres_changes', 
             { event: '*', schema: 'public', table: 'events' },
