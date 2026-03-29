@@ -15,23 +15,39 @@ let sales = [];
 // Authentication
 async function login(username, password) {
     try {
+        // Önce localStorage'de kontrol et (master user için)
+        const staffData = JSON.parse(localStorage.getItem('BiletPro_Staff')) || [];
+        const user = staffData.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+        
+        if (user) {
+            currentUser = user;
+            localStorage.setItem('BiletPro_Session', JSON.stringify(user));
+            showToast('Giriş başarılı!', 'success');
+            return { user: user };
+        }
+        
+        // Eğer local'de yoksa Supabase'de ara
         const { data, error } = await biletproSupabase
             .from('users')
             .select('*')
             .eq('username', username)
-            .eq('password', password)
             .single();
         
-        if (data) {
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+        
+        if (data && data.password === password) {
             currentUser = data;
-            localStorage.setItem('user', JSON.stringify(data));
+            localStorage.setItem('BiletPro_Session', JSON.stringify(data));
             showToast('Giriş başarılı!', 'success');
             return { user: data };
         } else {
-            throw new Error('Invalid credentials');
+            throw new Error('Kullanıcı adı veya şifre hatalı');
         }
     } catch (error) {
-        showToast('Kullanıcı adı veya şifre hatalı!', 'error');
+        console.error('Login error:', error);
+        showToast('Giriş başarısız!', 'error');
         throw error;
     }
 }
