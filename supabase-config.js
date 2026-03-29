@@ -45,14 +45,15 @@ async function loadEvents() {
             .order('date', { ascending: false });
         
         if (error) throw error;
-        events = data;
-        // render() fonksiyonu index.html'de tanımlı
+        // Global events değişkenini güncelle
+        window.events = data;
+        // render() fonksiyonunu çağır
         if (typeof window.render === 'function') {
             window.render();
         }
     } catch (error) {
         console.error('Events load error:', error);
-        events = [];
+        window.events = [];
         if (typeof window.render === 'function') {
             window.render();
         }

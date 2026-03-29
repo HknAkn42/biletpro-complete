@@ -146,6 +146,13 @@ window.writeAuditEvent = function(module, action, details) {
    ========================================== */
 function injectMenu(active = 'dashboard', eventId = null) {
     const session = JSON.parse(localStorage.getItem('BiletPro_Session')) || { name: "Misafir", role: "user" };
+    
+    // Eğer kullanıcı giriş yapmamışsa, login sayfasına yönlendir
+    if (!session.username || session.username === 'guest') {
+        window.location.href = 'login.html';
+        return;
+    }
+    
     const isAdmin = session.role === 'admin' || (session.username && session.username.toLowerCase() === 'hakan');
 
     const style = document.createElement('style');
