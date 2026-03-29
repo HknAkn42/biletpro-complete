@@ -144,7 +144,15 @@
             if (window.supabaseAPI) {
                 try {
                     await window.supabaseAPI.loadEvents();
-                    window.events = window.events || [];
+                    // Supabase'den gelen veriyi localStorage formatına çevir
+                    if (window.events && window.events.length > 0) {
+                        window.events = window.events.map(event => ({
+                            ...event,
+                            doorTime: event.door_time || event.doorTime,
+                            startTime: event.start_time || event.startTime,
+                            isActive: event.is_active !== false
+                        }));
+                    }
                     render();
                 } catch (error) {
                     console.error('Supabase load error:', error);
@@ -368,15 +376,12 @@
                 company: document.getElementById('evCompany').value,
                 venue: document.getElementById('evVenue').value,
                 city: document.getElementById('evCity').value,
-                fullAddress: document.getElementById('evFullAddr').value,
                 date: document.getElementById('evDate').value,
-                doorTime: document.getElementById('evDoorTime').value,
-                startTime: document.getElementById('evStartTime').value,
+                door_time: document.getElementById('evDoorTime').value || null,
+                start_time: document.getElementById('evStartTime').value || null,
                 cover: document.getElementById('evImg').value,
                 logo: tempLogo,
-                // Supabase için field mapping
-                door_time: document.getElementById('evDoorTime').value || null,
-                start_time: document.getElementById('evStartTime').value || null
+                is_active: true
             };
             
             if (editEventId) {
@@ -390,9 +395,7 @@
                 // YENİ KAYIT MODU
                 const data = { 
                     id: Date.now().toString(), 
-                    ...eventData, 
-                    categories: [],
-                    isActive: true
+                    ...eventData
                 };
                 window.events.push(data); 
                 if(typeof showToast === 'function') showToast("Yeni etkinlik mühürlendi!", "success");
