@@ -274,19 +274,11 @@
                             <button onclick="editEvent('${ev.id}')" class="bg-white/90 px-4 py-2 rounded-xl text-blue-600 font-black text-[10px] uppercase shadow-lg hover:bg-blue-600 hover:text-white transition-all">DÜZENLE</button>
                             <button onclick="deleteEvent('${ev.id}')" class="bg-white/90 px-4 py-2 rounded-xl text-red-500 font-black text-[10px] uppercase shadow-lg hover:bg-red-500 hover:text-white transition-all">SİL</button>
                         </div>
-                    </div>
-                    
-                    <div class="p-[55px] px-[35px] pb-[35px] flex-1 flex flex-col relative z-20">
-                        <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1 block">${ev.company || 'GENEL OPERASYON'}</span>
-                        <h2 class="text-3xl font-black text-slate-800 uppercase leading-[1.1] mb-5 tracking-tighter">${ev.title}</h2>
-                        
-                        </div>
-                    </div>`;
+                `;
                 container.appendChild(card);
             });
         }
 
-        // VERİTABANINA KAYIT VE GÜNCELLEME
         async function saveEvent() {
             const title = document.getElementById('evTitle').value; 
             if(!title) {
@@ -316,21 +308,48 @@
             }
         }
 
-        function deleteEvent(id) { 
+        async function deleteEvent(id) { 
             const msg = "Tüm etkinlik, masalar ve satış verileri silinecek. Onaylıyor musunuz?";
             
             if(typeof showConfirm === 'function') {
-                showConfirm("SİLME ONAYI", msg, () => {
-                    events = events.filter(e => String(e.id) !== String(id)); 
-                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(events)); 
-                    render(); 
-                    showToast("Etkinlik silindi.", "info");
+                showConfirm("SİLME ONAYI", msg, async () => {
+                    try {
+                        // Supabase'den sil
+                        const { error } = await biletproSupabase
+                            .from('events')
+                            .delete()
+                            .eq('id', id);
+                        
+                        if (error) throw error;
+                        
+                        // Events'i yeniden yükle
+                        await window.supabaseAPI.loadEvents();
+                        
+                        showToast("Etkinlik silindi.", "info");
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        showToast("Silme başarısız!", "error");
+                    }
                 });
             } else {
                 if(confirm(msg)) { 
-                    events = events.filter(e => String(e.id) !== String(id)); 
-                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(events)); 
-                    render(); 
+                    try {
+                        // Supabase'den sil
+                        const { error } = await biletproSupabase
+                            .from('events')
+                            .delete()
+                            .eq('id', id);
+                        
+                        if (error) throw error;
+                        
+                        // Events'i yeniden yükle
+                        await window.supabaseAPI.loadEvents();
+                        
+                        alert("Etkinlik silindi.");
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        alert("Silme başarısız!");
+                    }
                 }
             }
         }
@@ -339,6 +358,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             if (window.supabaseAPI) {
                 window.supabaseAPI.loadEvents();
+                render();
             }
         });
     </script>
