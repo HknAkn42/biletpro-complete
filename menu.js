@@ -146,7 +146,7 @@ window.writeAuditEvent = function(module, action, details) {
    ========================================== */
 function injectMenu(active = 'dashboard', eventId = null) {
     const session = JSON.parse(localStorage.getItem('BiletPro_Session')) || { name: "Misafir", role: "user" };
-    const isAdmin = session.role === 'admin' || session.username.toLowerCase() === 'hakan';
+    const isAdmin = session.role === 'admin' || (session.username && session.username.toLowerCase() === 'hakan');
 
     const style = document.createElement('style');
     style.innerHTML = `

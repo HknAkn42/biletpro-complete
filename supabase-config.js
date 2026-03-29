@@ -156,7 +156,7 @@ function setupRealtimeListeners() {
         .subscribe();
 
     // Sales listener
-    supabase
+    biletproSupabase
         .channel('sales')
         .on('postgres_changes',
             { event: '*', schema: 'public', table: 'sales' },
@@ -168,7 +168,7 @@ function setupRealtimeListeners() {
         .subscribe();
 
     // Customers listener
-    supabase
+    biletproSupabase
         .channel('customers')
         .on('postgres_changes',
             { event: '*', schema: 'public', table: 'customers' },
