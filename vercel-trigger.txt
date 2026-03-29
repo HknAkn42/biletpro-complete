@@ -1,0 +1,12 @@
+VERCEL DEPLOYMENT TRIGGER ADIMLARI:
+
+1. https://vercel.com/dashboard'ye gidin
+2. biletpro-complete projesini açın
+3. Deployments sekmesine tıklayın
+4. En üstteki "Redeploy" butonuna basın
+5. Bekleyin (1-2 dakika)
+
+Alternatif:
+- GitHub'da repository'ye gidin
+- Actions sekmesine tıklayın
+- Vercel workflow'u kontrol edin

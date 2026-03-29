@@ -61,12 +61,16 @@ async function loadEvents() {
             .order('date', { ascending: false });
         
         if (error) throw error;
+        
         // Global events değişkenini güncelle
         window.events = data;
+        
         // render() fonksiyonunu çağır
         if (typeof window.render === 'function') {
             window.render();
         }
+        
+        console.log('Events loaded:', data.length, 'events');
     } catch (error) {
         console.error('Events load error:', error);
         window.events = [];
@@ -84,6 +88,10 @@ async function saveEvent(eventData) {
             .select();
         
         if (error) throw error;
+        
+        // Kaydet sonrası events'i yeniden yükle
+        await loadEvents();
+        
         showToast('Etkinlik kaydedildi!', 'success');
         return data[0];
     } catch (error) {
