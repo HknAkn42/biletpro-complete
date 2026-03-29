@@ -22,7 +22,7 @@ async function login(username, password) {
         if (user) {
             currentUser = user;
             localStorage.setItem('BiletPro_Session', JSON.stringify(user));
-            showToast('Giriş başarılı!', 'success');
+            console.log('Giriş başarılı!');
             return { user: user };
         }
         
@@ -40,14 +40,14 @@ async function login(username, password) {
         if (data && data.password === password) {
             currentUser = data;
             localStorage.setItem('BiletPro_Session', JSON.stringify(data));
-            showToast('Giriş başarılı!', 'success');
+            console.log('Giriş başarılı!');
             return { user: data };
         } else {
             throw new Error('Kullanıcı adı veya şifre hatalı');
         }
     } catch (error) {
         console.error('Login error:', error);
-        showToast('Giriş başarısız!', 'error');
+        console.log('Giriş başarısız!');
         throw error;
     }
 }
