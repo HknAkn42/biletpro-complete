@@ -265,5 +265,6 @@ window.supabaseAPI = {
     saveCustomer,
     loadSales,
     makeSale,
-    getCurrentUser: () => currentUser
+    getCurrentUser: () => currentUser,
+    biletproSupabase // Direct access to Supabase client
 };
