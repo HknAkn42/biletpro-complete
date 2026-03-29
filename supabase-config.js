@@ -46,11 +46,16 @@ async function loadEvents() {
         
         if (error) throw error;
         events = data;
-        render();
+        // render() fonksiyonu index.html'de tanımlı
+        if (typeof window.render === 'function') {
+            window.render();
+        }
     } catch (error) {
         console.error('Events load error:', error);
         events = [];
-        render();
+        if (typeof window.render === 'function') {
+            window.render();
+        }
     }
 }
 
