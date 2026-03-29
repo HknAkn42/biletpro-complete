@@ -1,0 +1,26 @@
+{
+  "name": "biletpro-backend",
+  "version": "1.0.0",
+  "description": "BiletPro Ücretsiz Backend",
+  "main": "free-backend-starter.js",
+  "scripts": {
+    "start": "node free-backend-starter.js",
+    "dev": "nodemon free-backend-starter.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "pg": "^8.20.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "keywords": [
+    "biletpro",
+    "etkinlik",
+    "backend"
+  ],
+  "author": "Hakan",
+  "license": "MIT"
+}
