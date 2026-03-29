@@ -100,6 +100,27 @@ async function saveEvent(eventData) {
     }
 }
 
+async function updateEvent(id, eventData) {
+    try {
+        const { data, error } = await biletproSupabase
+            .from('events')
+            .update(eventData)
+            .eq('id', id)
+            .select();
+        
+        if (error) throw error;
+        
+        // Güncelleme sonrası events'i yeniden yükle
+        await loadEvents();
+        
+        showToast('Etkinlik güncellendi!', 'success');
+        return data[0];
+    } catch (error) {
+        showToast('Etkinlik güncellenemedi!', 'error');
+        throw error;
+    }
+}
+
 // Customers API
 async function loadCustomers() {
     try {
@@ -239,6 +260,7 @@ window.supabaseAPI = {
     },
     loadEvents,
     saveEvent,
+    updateEvent,
     loadCustomers,
     saveCustomer,
     loadSales,

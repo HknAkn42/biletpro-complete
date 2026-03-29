@@ -9,7 +9,6 @@
     
     <link rel="stylesheet" href="theme.css">
     
-    <!-- Supabase entegrasyonu -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="supabase-config.js"></script>
 
@@ -135,18 +134,21 @@
 
     <script>
         // Global değişken tanımları
-        window.events = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
+        let currentEvents = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
         let tempLogo = "";
         let editEventId = null;
 
-        // Supabase entegrasyonu - events'i Supabase'den yükle
+        // Supabase entegrasyonu - verileri Supabase'den yükle
         async function loadEventsFromSupabase() {
             if (window.supabaseAPI) {
                 try {
-                    await window.supabaseAPI.loadEvents();
-                    // Supabase'den gelen veriyi localStorage formatına çevir
-                    if (window.events && window.events.length > 0) {
-                        window.events = window.events.map(event => ({
+                    await window.supabaseAPI.loadEvents(); // Bu fonksiyon supabase-config.js içinden çalışır
+                    
+                    // Supabase'den gelen veriyi bizim Local formata uydur
+                    let remoteEvents = window.events || []; // supabase-config window.events'e yazar
+                    
+                    if (remoteEvents && remoteEvents.length > 0) {
+                        currentEvents = remoteEvents.map(event => ({
                             ...event,
                             doorTime: event.door_time || event.doorTime,
                             startTime: event.start_time || event.startTime,
@@ -156,21 +158,19 @@
                     render();
                 } catch (error) {
                     console.error('Supabase load error:', error);
-                    // Hata olursa localStorage'dan devam et
-                    window.events = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
+                    // Hata olursa lokal veriden devam et
+                    currentEvents = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
                     render();
                 }
             } else {
-                // Supabase yoksa localStorage'dan devam et
-                window.events = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
+                // Supabase yoksa lokalden devam et
+                currentEvents = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
                 render();
             }
         }
 
         // MODAL KONTROLLERİ
         function openModal(isEdit = false) { 
-            console.log('openModal called, isEdit:', isEdit); // Debug
-            
             if(!isEdit) {
                 editEventId = null;
                 tempLogo = ""; 
@@ -185,27 +185,18 @@
                     uploadStatus.style.color = "#64748b";
                 }
                 
-                const modalTitle = document.getElementById('modalTitle');
-                if (modalTitle) modalTitle.innerText = "ETKİNLİK MÜHÜRÜ";
-                
-                const saveBtn = document.getElementById('saveBtn');
-                if (saveBtn) saveBtn.innerText = "VERİYİ KAYDET";
+                document.getElementById('modalTitle').innerText = "ETKİNLİK MÜHÜRÜ";
+                document.getElementById('saveBtn').innerText = "VERİYİ KAYDET";
             }
             
-            const modal = document.getElementById('evModal');
-            if (modal) {
-                modal.classList.remove('hidden'); 
-                console.log('Modal should be visible now'); // Debug
-            } else {
-                console.error('Modal element not found!'); // Debug
-            }
+            document.getElementById('evModal').classList.remove('hidden'); 
         }
         
         function closeModal() { document.getElementById('evModal').classList.add('hidden'); }
 
         // DÜZENLEME MODUNU BAŞLAT
         function editEvent(id) {
-            const ev = window.events.find(e => String(e.id) === String(id));
+            const ev = currentEvents.find(e => String(e.id) === String(id));
             if(!ev) return;
 
             editEventId = id;
@@ -233,20 +224,20 @@
 
         // AKTİF/PASİF DEĞİŞTİRME FONKSİYONU
         function toggleStatus(id) {
-            const idx = window.events.findIndex(e => String(e.id) === String(id));
+            const idx = currentEvents.findIndex(e => String(e.id) === String(id));
             if(idx > -1) {
-                // Eğer isActive tanımlı değilse varsayılan true'dur, terse çeviriyoruz
-                window.events[idx].isActive = window.events[idx].isActive === false ? true : false;
+                currentEvents[idx].isActive = currentEvents[idx].isActive === false ? true : false;
                 
-                // Hem localStorage'a hem de Supabase'e kaydet
-                localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(window.events));
+                // Hem localStorage'a kaydet
+                localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(currentEvents));
                 
-                // Supabase'e de kaydet (varsa)
+                // Hem de Supabase'e kaydet (varsa)
                 if (window.supabaseAPI && window.supabaseAPI.saveEvent) {
                     const eventData = {
-                        ...window.events[idx],
-                        door_time: window.events[idx].doorTime || null,
-                        start_time: window.events[idx].startTime || null
+                        ...currentEvents[idx],
+                        door_time: currentEvents[idx].doorTime || null,
+                        start_time: currentEvents[idx].startTime || null,
+                        is_active: currentEvents[idx].isActive
                     };
                     window.supabaseAPI.saveEvent(eventData).catch(err => console.error('Supabase update error:', err));
                 }
@@ -254,8 +245,8 @@
                 render();
                 
                 if(typeof showToast === 'function') {
-                    const msg = window.events[idx].isActive ? "Etkinlik AKTİF edildi!" : "Etkinlik PASİFE alındı! Satış ve Kapı durduruldu.";
-                    showToast(msg, window.events[idx].isActive ? "success" : "info");
+                    const msg = currentEvents[idx].isActive ? "Etkinlik AKTİF edildi!" : "Etkinlik PASİFE alındı! Satış ve Kapı durduruldu.";
+                    showToast(msg, currentEvents[idx].isActive ? "success" : "info");
                 }
             }
         }
@@ -303,7 +294,7 @@
             container.innerHTML = "";
             
             // TARİHE GÖRE SIRALAMA (En yakın/ileri tarih en üstte)
-            const sortedEvents = [...window.events].sort((a, b) => {
+            const sortedEvents = [...currentEvents].sort((a, b) => {
                 const dateA = a.date ? new Date(a.date).getTime() : 0;
                 const dateB = b.date ? new Date(b.date).getTime() : 0;
                 return dateB - dateA; // Yeniden eskiye sıralama
@@ -343,7 +334,7 @@
                         <h2 class="text-3xl font-black text-slate-800 uppercase leading-[1.1] mb-5 tracking-tighter">${ev.title}</h2>
                         
                         <div class="grid grid-cols-2 gap-5 pt-6 border-t border-slate-100 mt-auto">
-                            <div><span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">LOKASYON</span><p class="text-[12px] font-bold text-slate-700 truncate mt-1">📍 ${ev.venue || 'Belirsiz'}</p></div>
+                            <div><span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">LOKASYON</span><p class="text-[12px] font-bold text-slate-700 truncate mt-1"> ${ev.venue || 'Belirsiz'}</p></div>
                             <div class="text-right"><span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">TARİH</span><p class="text-[13px] font-black text-slate-800 mt-1">${ev.date || '-'}</p></div>
                         </div>
                         
@@ -362,7 +353,7 @@
             });
         }
 
-        // VERİTABANINA KAYIT VE GÜNCELLEME - Supabase Entegrasyonlu
+        // VERİTABANINA KAYIT VE GÜNCELLEME
         async function saveEvent() {
             const title = document.getElementById('evTitle').value; 
             if(!title) {
@@ -385,34 +376,25 @@
             };
             
             if (editEventId) {
-                // GÜNCELLEME MODU
-                const idx = window.events.findIndex(e => String(e.id) === String(editEventId));
+                const idx = currentEvents.findIndex(e => String(e.id) === String(editEventId));
                 if(idx > -1) {
-                    window.events[idx] = { ...window.events[idx], ...eventData };
+                    currentEvents[idx] = { ...currentEvents[idx], ...eventData };
                     if(typeof showToast === 'function') showToast("Etkinlik güncellendi!", "success");
                 }
             } else {
-                // YENİ KAYIT MODU
-                const data = { 
-                    id: Date.now().toString(), 
-                    ...eventData
-                };
-                window.events.push(data); 
+                const data = { id: Date.now().toString(), ...eventData };
+                currentEvents.push(data); 
                 if(typeof showToast === 'function') showToast("Yeni etkinlik mühürlendi!", "success");
             }
             
-            // Hem localStorage'a hem de Supabase'e kaydet
-            localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(window.events));
+            localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(currentEvents));
             
-            // Supabase'e de kaydet (varsa)
             if (window.supabaseAPI && window.supabaseAPI.saveEvent) {
                 try {
                     await window.supabaseAPI.saveEvent(eventData);
-                    // Kaydet sonrası events'i yeniden yükle
                     await loadEventsFromSupabase();
                 } catch (error) {
                     console.error('Supabase save error:', error);
-                    // Hata olursa render'ı çağır
                     render();
                 }
             } else {
@@ -427,11 +409,9 @@
             
             if(typeof showConfirm === 'function') {
                 showConfirm("SİLME ONAYI", msg, async () => {
-                    // Hem localStorage'dan hem de Supabase'den sil
-                    window.events = window.events.filter(e => String(e.id) !== String(id)); 
-                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(window.events));
+                    currentEvents = currentEvents.filter(e => String(e.id) !== String(id)); 
+                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(currentEvents));
                     
-                    // Supabase'den sil (varsa)
                     if (window.supabaseAPI) {
                         try {
                             const { error } = await window.supabaseAPI.biletproSupabase
@@ -440,12 +420,9 @@
                                 .eq('id', id);
                             
                             if (error) throw error;
-                            
-                            // Events'i yeniden yükle
                             await loadEventsFromSupabase();
                         } catch (error) {
                             console.error('Supabase delete error:', error);
-                            // Hata olursa render'ı çağır
                             render();
                         }
                     } else {
@@ -456,14 +433,14 @@
                 });
             } else {
                 if(confirm(msg)) { 
-                    window.events = window.events.filter(e => String(e.id) !== String(id)); 
-                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(window.events));
+                    currentEvents = currentEvents.filter(e => String(e.id) !== String(id)); 
+                    localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(currentEvents));
                     render(); 
                 }
             }
         }
         
-        // BAŞLANGIÇ RENDER - Supabase entegrasyonlu
+        // BAŞLANGIÇ RENDER
         window.addEventListener('DOMContentLoaded', async () => {
             await loadEventsFromSupabase();
         });
