@@ -6,6 +6,9 @@
     <title>BiletPro | Akıllı Erişim</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="supabase-config.js"></script>
     <style>
         body {
             background: radial-gradient(circle at top right, #1e293b, #0f172a);
@@ -156,23 +159,15 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-        function handleInitialLogin() {
-            const u = document.getElementById('username').value.trim().toLowerCase();
+        async function handleInitialLogin() {
+            const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value;
             
-            // Kullanıcı adını küçük harfe çevirip öyle arıyoruz
-            const user = staff.find(x => x.username.toLowerCase() === u && x.password === p);
-
-            if (user) {
-                tempUser = user;
-                localStorage.setItem('BiletPro_LastUser', user.username);
-                if (!user.pin) {
-                    showStep('stepCreatePin');
-                    renderPad('createPinPad');
-                } else {
-                    loginComplete(user);
-                }
-            } else {
+            try {
+                const result = await window.supabaseAPI.login(u, p);
+                localStorage.setItem('BiletPro_LastUser', u);
+                loginComplete(result.user);
+            } catch (error) {
                 shakeTerminal();
             }
         }

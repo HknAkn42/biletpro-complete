@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="theme.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="supabase-config.js"></script>
 
     <style>
         .event-card {
@@ -130,7 +133,7 @@
     </div>
 
     <script>
-        let events = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
+        let events = [];
         let tempLogo = "";
         let editEventId = null;
 
@@ -297,7 +300,7 @@
         }
 
         // VERİTABANINA KAYIT VE GÜNCELLEME
-        function saveEvent() {
+        async function saveEvent() {
             const title = document.getElementById('evTitle').value; 
             if(!title) {
                 if(typeof showToast === 'function') showToast("Etkinlik Başlığı zorunludur!", "error");
@@ -305,43 +308,25 @@
                 return;
             }
             
-            if (editEventId) {
-                // GÜNCELLEME MODU
-                const idx = events.findIndex(e => String(e.id) === String(editEventId));
-                if(idx > -1) {
-                    events[idx].title = title;
-                    events[idx].company = document.getElementById('evCompany').value;
-                    events[idx].venue = document.getElementById('evVenue').value;
-                    events[idx].city = document.getElementById('evCity').value;
-                    events[idx].fullAddress = document.getElementById('evFullAddr').value;
-                    events[idx].date = document.getElementById('evDate').value;
-                    events[idx].doorTime = document.getElementById('evDoorTime').value;
-                    events[idx].startTime = document.getElementById('evStartTime').value;
-                    events[idx].cover = document.getElementById('evImg').value;
-                    if(tempLogo) events[idx].logo = tempLogo;
-                }
-                if(typeof showToast === 'function') showToast("Etkinlik güncellendi!", "success");
-            } else {
-                // YENİ KAYIT MODU
-                const data = { 
-                    id: Date.now().toString(), title, 
-                    company: document.getElementById('evCompany').value, 
-                    venue: document.getElementById('evVenue').value, 
-                    city: document.getElementById('evCity').value, 
-                    fullAddress: document.getElementById('evFullAddr').value, 
-                    date: document.getElementById('evDate').value, 
-                    doorTime: document.getElementById('evDoorTime').value, 
-                    startTime: document.getElementById('evStartTime').value, 
-                    cover: document.getElementById('evImg').value, 
-                    logo: tempLogo, categories: [],
-                    isActive: true
-                };
-                events.push(data); 
-                if(typeof showToast === 'function') showToast("Yeni etkinlik mühürlendi!", "success");
-            }
+            const eventData = {
+                title,
+                company: document.getElementById('evCompany').value,
+                venue: document.getElementById('evVenue').value,
+                city: document.getElementById('evCity').value,
+                date: document.getElementById('evDate').value,
+                door_time: document.getElementById('evDoorTime').value,
+                start_time: document.getElementById('evStartTime').value,
+                cover: document.getElementById('evImg').value,
+                logo: tempLogo
+            };
             
-            localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(events)); 
-            render(); closeModal();
+            try {
+                await window.supabaseAPI.saveEvent(eventData);
+                render(); 
+                closeModal();
+            } catch (error) {
+                console.error('Save error:', error);
+            }
         }
 
         function deleteEvent(id) { 
@@ -363,8 +348,12 @@
             }
         }
         
-        // BAŞLANGIÇ RENDER
-        render();
+        // BAŞLANGIÇ RENDER - Supabase'den veri yükle
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.supabaseAPI) {
+                window.supabaseAPI.loadEvents();
+            }
+        });
     </script>
 </body>
 </html>
