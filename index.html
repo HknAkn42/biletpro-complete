@@ -156,7 +156,7 @@
 
         // DÜZENLEME MODUNU BAŞLAT
         function editEvent(id) {
-            const ev = events.find(e => String(e.id) === String(id));
+            const ev = window.events.find(e => String(e.id) === String(id));
             if(!ev) return;
 
             editEventId = id;
@@ -184,16 +184,16 @@
 
         // AKTİF/PASİF DEĞİŞTİRME FONKSİYONU
         function toggleStatus(id) {
-            const idx = events.findIndex(e => String(e.id) === String(id));
+            const idx = window.events.findIndex(e => String(e.id) === String(id));
             if(idx > -1) {
                 // Eğer isActive tanımlı değilse varsayılan true'dur, terse çeviriyoruz
-                events[idx].isActive = events[idx].isActive === false ? true : false;
-                localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(events));
+                window.events[idx].isActive = window.events[idx].isActive === false ? true : false;
+                localStorage.setItem('EventPro_DB_Ultimate_Final', JSON.stringify(window.events));
                 render();
                 
                 if(typeof showToast === 'function') {
-                    const msg = events[idx].isActive ? "Etkinlik AKTİF edildi!" : "Etkinlik PASİFE alındı! Satış ve Kapı durduruldu.";
-                    showToast(msg, events[idx].isActive ? "success" : "info");
+                    const msg = window.events[idx].isActive ? "Etkinlik AKTİF edildi!" : "Etkinlik PASİFE alındı! Satış ve Kapı durduruldu.";
+                    showToast(msg, window.events[idx].isActive ? "success" : "info");
                 }
             }
         }
@@ -241,7 +241,7 @@
             container.innerHTML = "";
             
             // TARİHE GÖRE SIRALAMA (En yakın/ileri tarih en üstte)
-            const sortedEvents = [...events].sort((a, b) => {
+            const sortedEvents = [...window.events].sort((a, b) => {
                 const dateA = a.date ? new Date(a.date).getTime() : 0;
                 const dateB = b.date ? new Date(b.date).getTime() : 0;
                 return dateB - dateA; // Yeniden eskiye sıralama
