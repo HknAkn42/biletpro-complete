@@ -313,8 +313,8 @@
                 venue: document.getElementById('evVenue').value,
                 city: document.getElementById('evCity').value,
                 date: document.getElementById('evDate').value,
-                door_time: document.getElementById('evDoorTime').value,
-                start_time: document.getElementById('evStartTime').value,
+                door_time: document.getElementById('evDoorTime').value || null,
+                start_time: document.getElementById('evStartTime').value || null,
                 cover: document.getElementById('evImg').value,
                 logo: tempLogo
             };
