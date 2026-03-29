@@ -192,7 +192,7 @@
     </div>
 
     <script>
-        let events = JSON.parse(localStorage.getItem('EventPro_DB_Ultimate_Final')) || [];
+        let events = window.events || [];
         let ev = events.find(e => e.id == eventId);
         let currentAddCatId = null, editingCatId = null, editingMasaRef = null;
 
