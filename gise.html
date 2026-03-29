@@ -185,21 +185,31 @@
                 <div><span class="label-mini">KİŞİ KAPASİTESİ</span><input id="editMasaKap" type="number" class="input-silk text-center"></div>
             </div>
             <div class="grid grid-cols-2 gap-4 mt-12">
-                <button onclick="closeEditMasaModal()" class="py-5 font-bold text-slate-400 uppercase text-xs hover:text-slate-800 transition-all">VAZGEÇ</button>
-                <button onclick="saveMasaEdit()" class="bg-slate-900 text-white rounded-[20px] py-5 font-black text-xs uppercase shadow-xl hover:bg-blue-600 transition-all">MÜHÜRLE</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let events = window.events || [];
-        let ev = events.find(e => e.id == eventId);
         let currentAddCatId = null, editingCatId = null, editingMasaRef = null;
 
-        if(!ev) window.location.href = 'index.html';
-        
-        document.getElementById('headLogo').src = ev.logo || 'https://via.placeholder.com/150';
-        document.getElementById('headTitle').innerText = ev.title + " | MİMARİ";
+        // Event'i yükle
+        function loadCurrentEvent() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id');
+            
+            if (window.BiletPro && window.BiletPro.currentEvent) {
+                ev = window.BiletPro.currentEvent;
+            } else if (window.events && eventId) {
+                ev = window.events.find(e => String(e.id) === String(eventId));
+            }
+            
+            if(!ev) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // UI'ı güncelle
+            document.getElementById('headLogo').src = ev.logo || 'https://via.placeholder.com/150';
+            document.getElementById('headTitle').innerText = ev.title + " | MİMARİ";
+        }
+
+        // Sayfa yüklendiğinde çalıştır
+        window.addEventListener('DOMContentLoaded', loadCurrentEvent);
 
         // KATEGORİ YÖNETİMİ
         function addCategory() {
