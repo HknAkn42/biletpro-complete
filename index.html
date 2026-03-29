@@ -160,16 +160,36 @@
 
         // MODAL KONTROLLERİ
         function openModal(isEdit = false) { 
+            console.log('openModal called, isEdit:', isEdit); // Debug
+            
             if(!isEdit) {
                 editEventId = null;
                 tempLogo = ""; 
-                ['evTitle','evCompany','evVenue','evCity','evDate','evDoorTime','evStartTime','evImg','evFullAddr'].forEach(id => document.getElementById(id).value = ""); 
-                document.getElementById('uploadStatus').innerText = "TIKLA VE GÖRSEL DOSYASI SEÇ"; 
-                document.getElementById('uploadStatus').style.color = "#64748b";
-                document.getElementById('modalTitle').innerText = "ETKİNLİK MÜHÜRÜ";
-                document.getElementById('saveBtn').innerText = "VERİYİ KAYDET";
+                ['evTitle','evCompany','evVenue','evCity','evDate','evDoorTime','evStartTime','evImg','evFullAddr'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.value = ""; 
+                });
+                
+                const uploadStatus = document.getElementById('uploadStatus');
+                if (uploadStatus) {
+                    uploadStatus.innerText = "TIKLA VE GÖRSEL DOSYASI SEÇ"; 
+                    uploadStatus.style.color = "#64748b";
+                }
+                
+                const modalTitle = document.getElementById('modalTitle');
+                if (modalTitle) modalTitle.innerText = "ETKİNLİK MÜHÜRÜ";
+                
+                const saveBtn = document.getElementById('saveBtn');
+                if (saveBtn) saveBtn.innerText = "VERİYİ KAYDET";
             }
-            document.getElementById('evModal').classList.remove('hidden'); 
+            
+            const modal = document.getElementById('evModal');
+            if (modal) {
+                modal.classList.remove('hidden'); 
+                console.log('Modal should be visible now'); // Debug
+            } else {
+                console.error('Modal element not found!'); // Debug
+            }
         }
         
         function closeModal() { document.getElementById('evModal').classList.add('hidden'); }
